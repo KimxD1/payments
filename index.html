@@ -326,7 +326,7 @@
 
   <!-- ================= 화면 1. 시작 화면 ================= -->
   <div class="screen active" id="screen-start">
-    <div class="start-welcome-badge">어서오세요!</div>
+    <div class="start-welcome-badge">맛있는 과일이 가득! 🍓🍇</div>
     
     <!-- 아이들이 직접 그린 'IMG_5542.jpg' 간판 사진 배치 -->
     <div class="signboard-wrap">
@@ -409,7 +409,7 @@
       <h2 class="pay-title">현금 결제</h2>
       <div class="tag-icon">💵</div>
       <div class="pay-amount" id="cashAmount">0원</div>
-      <div class="pay-desc">선생님(직원)에게 현금을<br>전달해주세요</div>
+      <div class="pay-desc">직원에게 현금을<br>전달해주세요</div>
       <button class="box-btn dark sim-btn" onclick="finishPayment()">결제 완료</button>
     </div>
   </div>
@@ -491,7 +491,7 @@
     resetCardScreenMessage();
 
     if(!('NDEFReader' in window)){
-      document.getElementById('cardPayDesc').innerHTML = '이 기기에서는 NFC 인식이<br>지원되지 않아요. 선생님을 불러주세요';
+      document.getElementById('cardPayDesc').innerHTML = '이 기기에서는 NFC 인식이<br>지원되지 않아요. 직원을 불러주세요';
       document.getElementById('cardTagIcon').classList.remove('pulse');
       return;
     }
@@ -507,7 +507,7 @@
       };
       reader.onreadingerror = () => {};
     }).catch(() => {
-      document.getElementById('cardPayDesc').innerHTML = 'NFC 권한이 필요해요<br>선생님을 불러주세요';
+      document.getElementById('cardPayDesc').innerHTML = 'NFC 권한이 필요해요<br>직원을 불러주세요';
       document.getElementById('cardTagIcon').classList.remove('pulse');
     });
   }
