@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>NFC 모의결제 단말기</title>
+<style>
+  :root{
+    --bg-deep: #0f2027;
+    --bg-panel: #16323a;
+    --bg-panel-2: #1c3d46;
+    --accent: #ffb648;
+    --accent-dim: #7a5a2a;
+    --ok: #4fd1a5;
+    --text-main: #eef4f3;
+    --text-dim: #8fa9ac;
+    --mono: 'DM Mono', 'SFMono-Regular', Consolas, monospace;
+    --sans: 'Manrope', -apple-system, sans-serif;
+  }
+  @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&family=DM+Mono:wght@400;500&display=swap');
+
+  * { box-sizing: border-box; }
+  html, body {
+    height: 100%;
+    margin: 0;
+    background: radial-gradient(circle at 50% 0%, var(--bg-panel-2), var(--bg-deep) 70%);
+    font-family: var(--sans);
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .terminal {
+    width: 380px;
+    max-width: 92vw;
+    background: linear-gradient(180deg, var(--bg-panel), #102329);
+    border-radius: 28px;
+    padding: 28px 24px 32px;
+    box-shadow: 0 30px 60px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .brand-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 22px;
+  }
+  .brand-row .name { font-weight: 800; font-size: 15px; letter-spacing: 0.2px; }
+  .brand-row .mode-tag {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    border: 1px solid var(--accent-dim);
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: rgba(255,182,72,0.08);
+  }
+
+  .amount-display {
+    background: #081418;
+    border-radius: 16px;
+    padding: 20px 18px;
+    margin-bottom: 22px;
+    border: 1px solid rgba(255,255,255,0.05);
+  }
+  .amount-label { font-size: 12px; color: var(--text-dim); margin-bottom: 6px; }
+  .amount-value {
+    font-family: var(--mono);
+    font-size: 34px;
+    font-weight: 500;
+    letter-spacing: -0.5px;
+    color: var(--text-main);
+  }
+  .amount-value span { color: var(--text-dim); font-size: 18px; margin-left: 4px; }
+
+  .tag-zone {
+    position: relative;
+    width: 210px;
+    height: 210px;
+    margin: 8px auto 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 1.5px dashed rgba(255,182,72,0.25);
+  }
+  .ring.pulse { animation: pulse 1.6s ease-out infinite; }
+  @keyframes pulse {
+    0% { transform: scale(0.82); opacity: 0.9; border-color: rgba(255,182,72,0.55); }
+    100% { transform: scale(1.15); opacity: 0; border-color: rgba(255,182,72,0); }
+  }
+  .core {
+    width: 128px;
+    height: 128px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #234a52, #0d2126);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: inset 0 2px 6px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04);
+    transition: box-shadow 0.3s ease;
+  }
+  .core svg { width: 46px; height: 46px; }
+  .core.success { box-shadow: inset 0 2px 6px rgba(0,0,0,0.4), 0 0 0 3px rgba(79,209,165,0.5); }
+
+  .status-line {
+    text-align: center;
+    font-size: 14px;
+    color: var(--text-dim);
+    min-height: 20px;
+    margin-bottom: 18px;
+  }
+  .status-line.active { color: var(--accent); font-weight: 600; }
+  .status-line.success { color: var(--ok); font-weight: 700; }
+
+  .uid-line {
+    text-align: center;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-dim);
+    min-height: 16px;
+    margin-bottom: 18px;
+    word-break: break-all;
+  }
+
+  button.primary {
+    width: 100%;
+    padding: 15px;
+    border-radius: 14px;
+    border: none;
+    background: var(--accent);
+    color: #21150a;
+    font-weight: 800;
+    font-size: 15px;
+    cursor: pointer;
+    letter-spacing: 0.2px;
+  }
+  button.primary:disabled { opacity: 0.5; cursor: not-allowed; }
+  button.primary:active:not(:disabled) { transform: scale(0.98); }
+
+  button.ghost {
+    width: 100%;
+    margin-top: 10px;
+    padding: 12px;
+    border-radius: 14px;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: transparent;
+    color: var(--text-dim);
+    font-size: 13px;
+    cursor: pointer;
+  }
+
+  .log-box {
+    margin-top: 22px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    padding-top: 14px;
+  }
+  .log-title { font-size: 11px; color: var(--text-dim); margin-bottom: 8px; }
+  .log-entry {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--text-main);
+    display: flex;
+    justify-content: space-between;
+    padding: 5px 0;
+    border-bottom: 1px dashed rgba(255,255,255,0.05);
+  }
+  .log-entry .ok-tag { color: var(--ok); }
+  .empty-log { font-size: 12px; color: var(--text-dim); font-style: italic; }
+
+  .warn {
+    margin-top: 16px;
+    font-size: 11.5px;
+    color: var(--text-dim);
+    background: rgba(255,182,72,0.06);
+    border: 1px solid var(--accent-dim);
+    padding: 10px 12px;
+    border-radius: 10px;
+    line-height: 1.5;
+  }
+</style>
+</head>
+<body>
+
+<div class="terminal">
+  <div class="brand-row">
+    <div class="name">태그결제 단말기</div>
+    <div class="mode-tag">MOCK MODE</div>
+  </div>
+
+  <div class="amount-display">
+    <div class="amount-label">결제 예정 금액 (모의)</div>
+    <div class="amount-value">12,000<span>원</span></div>
+  </div>
+
+  <div class="tag-zone">
+    <div class="ring" id="ring1"></div>
+    <div class="ring" id="ring2" style="animation-delay:0.6s"></div>
+    <div class="core" id="core">
+      <svg id="icon-idle" viewBox="0 0 24 24" fill="none" stroke="#ffb648" stroke-width="1.6">
+        <path d="M6.5 12a5.5 5.5 0 0 1 11 0M4 12a8 8 0 0 1 16 0M9 12a2.5 2.5 0 0 1 6 0" stroke-linecap="round"/>
+      </svg>
+      <svg id="icon-ok" viewBox="0 0 24 24" fill="none" stroke="#4fd1a5" stroke-width="2" style="display:none">
+        <path d="M4 12.5l5 5L20 6.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+  </div>
+
+  <div class="status-line" id="status">카드를 태그해주세요</div>
+  <div class="uid-line" id="uidLine">&nbsp;</div>
+
+  <button class="primary" id="scanBtn">NFC 스캔 시작</button>
+  <button class="ghost" id="simBtn">태그 시뮬레이션 (테스트용)</button>
+
+  <div class="log-box">
+    <div class="log-title">거래 로그 (로컬 메모리, 서버 전송 없음)</div>
+    <div id="logList"><div class="empty-log">아직 기록된 거래가 없습니다</div></div>
+  </div>
+
+  <div class="warn" id="warnBox">
+    이 화면은 실제 결제를 처리하지 않는 모의(mock) 단말기입니다. Web NFC는 Android + Chrome(HTTPS 또는 localhost)에서만 동작하며, 스캔 시작은 버튼 클릭 등 사용자 조작 안에서만 호출할 수 있습니다.
+  </div>
+</div>
+
+<script>
+  const scanBtn = document.getElementById('scanBtn');
+  const simBtn = document.getElementById('simBtn');
+  const statusEl = document.getElementById('status');
+  const uidLine = document.getElementById('uidLine');
+  const core = document.getElementById('core');
+  const iconIdle = document.getElementById('icon-idle');
+  const iconOk = document.getElementById('icon-ok');
+  const ring1 = document.getElementById('ring1');
+  const ring2 = document.getElementById('ring2');
+  const logList = document.getElementById('logList');
+
+  let txLog = [];
+
+  function setPulsing(on) {
+    ring1.classList.toggle('pulse', on);
+    ring2.classList.toggle('pulse', on);
+  }
+
+  function resetVisual() {
+    core.classList.remove('success');
+    iconIdle.style.display = 'block';
+    iconOk.style.display = 'none';
+    statusEl.className = 'status-line';
+    statusEl.textContent = '카드를 태그해주세요';
+    uidLine.textContent = '\u00A0';
+  }
+
+  function renderLog() {
+    if (txLog.length === 0) {
+      logList.innerHTML = '<div class="empty-log">아직 기록된 거래가 없습니다</div>';
+      return;
+    }
+    logList.innerHTML = txLog.slice().reverse().map(t =>
+      `<div class="log-entry"><span>${t.time} · UID ${t.uid}</span><span class="ok-tag">MOCK 승인</span></div>`
+    ).join('');
+  }
+
+  // 카드를 태그했을 때 실행되는 '모의 결제' 처리부.
+  // 실제 결제 게이트웨이 호출 없이, UID만 받아 화면 상태만 바꾼다.
+  function handleTagDetected(uid) {
+    setPulsing(false);
+    statusEl.className = 'status-line active';
+    statusEl.textContent = '카드 인식됨 · 처리 중...';
+    uidLine.textContent = 'UID: ' + uid;
+
+    setTimeout(() => {
+      core.classList.add('success');
+      iconIdle.style.display = 'none';
+      iconOk.style.display = 'block';
+      statusEl.className = 'status-line success';
+      statusEl.textContent = '모의 승인 완료 (실결제 아님)';
+
+      txLog.push({
+        time: new Date().toLocaleTimeString('ko-KR', { hour12: false }),
+        uid: uid
+      });
+      renderLog();
+
+      setTimeout(resetVisual, 2200);
+    }, 1100);
+  }
+
+  function fakeUid() {
+    const bytes = Array.from({length: 4}, () =>
+      Math.floor(Math.random() * 256).toString(16).padStart(2, '0'));
+    return bytes.join(':').toUpperCase();
+  }
+
+  simBtn.addEventListener('click', () => {
+    setPulsing(true);
+    statusEl.className = 'status-line active';
+    statusEl.textContent = '태그 감지 대기 중 (시뮬레이션)...';
+    setTimeout(() => handleTagDetected(fakeUid()), 900);
+  });
+
+  scanBtn.addEventListener('click', async () => {
+    if (!('NDEFReader' in window)) {
+      statusEl.className = 'status-line';
+      statusEl.textContent = 'Web NFC 미지원 브라우저입니다';
+      uidLine.textContent = 'Android + Chrome + HTTPS 환경이 필요합니다';
+      return;
+    }
+    try {
+      const reader = new NDEFReader();
+      await reader.scan();
+
+      setPulsing(true);
+      statusEl.className = 'status-line active';
+      statusEl.textContent = '스캔 중... 카드를 태블릿에 태그하세요';
+      scanBtn.disabled = true;
+
+      reader.onreading = (event) => {
+        // event.message.records 는 카드에 아무 데이터가 없어도
+        // event.serialNumber(UID)는 태그 감지 시점에 함께 전달된다.
+        const uid = event.serialNumber || fakeUid();
+        handleTagDetected(uid);
+        scanBtn.disabled = false;
+      };
+
+      reader.onreadingerror = () => {
+        statusEl.className = 'status-line';
+        statusEl.textContent = '태그를 읽을 수 없습니다. 다시 시도하세요';
+        setPulsing(false);
+        scanBtn.disabled = false;
+      };
+    } catch (err) {
+      statusEl.className = 'status-line';
+      statusEl.textContent = 'NFC 권한/스캔 실패: ' + err.message;
+      scanBtn.disabled = false;
+    }
+  });
+</script>
+
+</body>
+</html>
