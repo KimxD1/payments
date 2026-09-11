@@ -8,22 +8,23 @@
 <link href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap" rel="stylesheet">
 <style>
   :root{
-    /* 전체 사이트 톤을 노란색 계열로 - 배경 자체를 옐로우 파스텔로 */
-    --bg-page:#FFEFA6;        /* Elfin Yellow 파스텔 - 배경 전체 톤 */
-    --bg-card:#FFFCEF;        /* 카드/정보 박스 - 배경보다 밝게, 가독성용 */
-    --primary:#CBDA4E;        /* Sunny Lime */
-    --primary-press:#B4C632;
-    --secondary:#F4DD86;      /* Elfin Yellow(진한 버전) */
-    --secondary-press:#E9C956;
-    --accent:#F0BA52;         /* Yellow Jasper */
-    --accent-press:#DE9F34;
-    --charlock:#C9C15C;       /* Charlock */
-    --charlock-press:#B0A83E;
-    --text-dark:#3D362B;
-    --text-mid:#7A6F5C;
-    --white:#FFFFFF;
-    --radius:15px;
+    /* 따뜻하고 밝은 노란색 파스텔 계열 컬러 팔레트 */
+    --bg-page: #FFF4C3;        /* 따뜻한 파스텔 노랑 배경 */
+    --bg-card: #FFFFFF;        /* 카드 및 컨테이너 */
+    --primary: #FFD23F;        /* 메인 노랑 버튼 */
+    --primary-press: #E6B800;
+    --secondary: #FFE082;      /* 연한 노랑 */
+    --secondary-press: #F5C842;
+    --accent: #FF7B54;         /* 포인트 주황 */
+    --accent-press: #E25B34;
+    --text-dark: #4A3E3D;      /* 다크 브라운 */
+    --text-mid: #8C7A6B;       /* 토프 브라운 */
+    --border-color: #F0CF65;   /* 귀여운 테두리 색상 */
+    --radius: 24px;
+    --shadow: 0 8px 20px rgba(212, 160, 23, 0.15);
+    --btn-shadow: 0 6px 0px #DDA800;
   }
+
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
   html,body{
     margin:0;padding:0;
@@ -32,21 +33,21 @@
     overscroll-behavior:none;
   }
   body{
-    background:var(--bg-page);
+    background: var(--bg-page);
     font-family:'Gowun Dodum','Noto Sans KR',sans-serif;
     display:flex;
     align-items:stretch;
     justify-content:center;
     min-height:100dvh;
+    color: var(--text-dark);
   }
 
-  /* 실제 기기(태블릿)에서 풀스크린으로 사용하는 반응형 앱 컨테이너 */
   .app{
     position:relative;
     width:100%;
-    max-width:820px;           /* 가로가 넓은 태블릿에서도 과도하게 늘어나지 않도록 */
+    max-width:820px;
     min-height:100dvh;
-    background:var(--bg-page);
+    background: var(--bg-page);
     display:flex;
     flex-direction:column;
     overflow:hidden;
@@ -57,11 +58,11 @@
     inset:0;
     display:none;
     flex-direction:column;
-    padding: clamp(20px,4vh,44px) clamp(20px,5vw,56px);
-    animation:fadeIn .25s ease;
+    padding: clamp(20px, 4vh, 40px) clamp(20px, 5vw, 48px);
+    animation: fadeIn .3s ease-out;
   }
   .screen.active{display:flex;}
-  @keyframes fadeIn{from{opacity:0;} to{opacity:1;}}
+  @keyframes fadeIn{from{opacity:0; transform: scale(0.98);} to{opacity:1; transform: scale(1);}}
 
   h1,h2,.headline{
     font-family:'Jua',sans-serif;
@@ -70,171 +71,248 @@
     line-height:1.35;
   }
 
-  /* ---- 공통 상단 바 (인원/금액 유지 표시) ---- */
+  /* ---- 상단 바 ---- */
   .status-bar{
     display:flex;
-    gap:clamp(10px,2vw,16px);
-    margin-bottom:clamp(14px,2.5vh,22px);
+    gap:clamp(12px, 2vw, 18px);
+    margin-bottom:clamp(16px, 2.5vh, 24px);
   }
   .status-chip{
     flex:1;
     background:var(--bg-card);
     border-radius:var(--radius);
-    padding:clamp(12px,2vh,18px) clamp(12px,2vw,18px);
+    padding:clamp(14px, 2vh, 20px) clamp(12px, 2vw, 18px);
     text-align:center;
+    border: 3px solid var(--border-color);
+    box-shadow: var(--shadow);
   }
-  .status-chip .label{font-size:clamp(13px,1.6vh,16px);color:var(--text-mid);}
-  .status-chip .value{font-family:'Jua',sans-serif;font-size:clamp(20px,3vh,26px);color:var(--text-dark);margin-top:2px;}
+  .status-chip .label{font-size:clamp(14px, 1.8vh, 18px); color:var(--text-mid); font-weight: bold;}
+  .status-chip .value{font-family:'Jua',sans-serif; font-size:clamp(22px, 3.5vh, 30px); color:var(--accent); margin-top:2px;}
 
   .back-btn{
     position:absolute;
-    top:clamp(16px,3vh,24px); left:clamp(16px,4vw,24px);
-    width:clamp(52px,8vh,64px);height:clamp(52px,8vh,64px);
-    border-radius:var(--radius);
+    top:clamp(16px, 3vh, 24px); left:clamp(16px, 4vw, 24px);
+    width:clamp(52px, 8vh, 64px); height:clamp(52px, 8vh, 64px);
+    border-radius:50%;
     background:var(--bg-card);
-    border:none;
+    border: 3px solid var(--border-color);
     font-family:'Jua',sans-serif;
-    font-size:clamp(20px,3vh,26px);
+    font-size:clamp(24px, 3.5vh, 32px);
     color:var(--text-dark);
-    display:flex;align-items:center;justify-content:center;
+    display:flex; align-items:center; justify-content:center;
     z-index:5;
-    transition:transform .08s ease, background .12s ease;
+    cursor:pointer;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    transition: transform .1s ease, background .15s ease;
     touch-action:manipulation;
   }
-  .back-btn:active{transform:scale(0.93);background:var(--secondary);}
+  .back-btn:active{transform:scale(0.9); background:var(--secondary);}
 
-  /* ---- 큰 박스 버튼 공통 ---- */
+  /* ---- 버튼 스타일 ---- */
   .box-btn{
-    border:none;
+    border: 3px solid #DDA800;
     border-radius:var(--radius);
     font-family:'Jua',sans-serif;
     cursor:pointer;
     display:flex;
     align-items:center;
     justify-content:center;
-    gap:10px;
+    gap:12px;
     color:var(--text-dark);
-    transition:transform .08s ease, background-color .12s ease;
-    min-height:clamp(70px,10vh,92px);
+    box-shadow: var(--btn-shadow);
+    transition: transform .08s ease, box-shadow .08s ease, background-color .12s ease;
+    min-height:clamp(72px, 10vh, 96px);
     touch-action:manipulation;
     user-select:none;
   }
-  .box-btn:active{transform:scale(0.96);}
+  .box-btn:active{
+    transform: translateY(4px);
+    box-shadow: 0 2px 0px #DDA800;
+  }
   .box-btn.primary{background:var(--primary);}
-  .box-btn.primary:active{background:var(--primary-press);}
-  .box-btn.secondary{background:var(--secondary);}
-  .box-btn.secondary:active{background:var(--secondary-press);}
-  .box-btn.accent{background:var(--accent); color:var(--white);}
-  .box-btn.accent:active{background:var(--accent-press);}
-  .box-btn.dark{background:var(--text-dark); color:var(--white);}
-  .box-btn.dark:active{background:#241f18;}
-  .box-btn:disabled{background:#F2ECC9; color:#B7AF9C; cursor:not-allowed;}
-  .box-btn:disabled:active{transform:none;}
+  .box-btn.secondary{background:var(--secondary); border-color: #E2B022; box-shadow: 0 6px 0px #E2B022;}
+  .box-btn.secondary:active{box-shadow: 0 2px 0px #E2B022;}
+  .box-btn.accent{background:var(--accent); border-color: #D94625; color: #FFF; box-shadow: 0 6px 0px #D94625;}
+  .box-btn.accent:active{box-shadow: 0 2px 0px #D94625;}
+  .box-btn.dark{background:var(--text-dark); border-color: #2D2524; color: #FFF; box-shadow: 0 6px 0px #2D2524;}
+  .box-btn.dark:active{box-shadow: 0 2px 0px #2D2524;}
+  .box-btn:disabled{
+    background:#E6DFCE;
+    border-color: #C5BDAB;
+    color:#AA9F8C;
+    box-shadow: 0 6px 0px #C5BDAB;
+    cursor:not-allowed;
+  }
+  .box-btn:disabled:active{transform:none; box-shadow: 0 6px 0px #C5BDAB;}
 
   /* ---------------- 화면 1. 시작 화면 ---------------- */
-  #screen-start{align-items:center; justify-content:center; text-align:center; gap:clamp(48px,10vh,96px);}
-  .start-title{font-size:clamp(38px,7.5vh,60px);}
-  .start-sub{font-size:clamp(26px,5.5vh,44px); margin-top:10px; color:var(--accent-press);}
-  .start-cta{width:100%; font-size:clamp(22px,4vh,32px); padding:0 20px;}
+  #screen-start{
+    align-items:center;
+    justify-content:space-around;
+    text-align:center;
+    padding: clamp(30px, 5vh, 60px) clamp(20px, 5vw, 40px);
+  }
+  
+  /* 손글씨 간판 이미지 프레임 */
+  .signboard-wrap {
+    width: 100%;
+    max-width: 680px;
+    background: #FFF;
+    padding: 16px;
+    border-radius: 32px;
+    border: 5px solid #F0CF65;
+    box-shadow: 0 12px 28px rgba(212, 160, 23, 0.22);
+    transform: rotate(-1deg);
+    transition: transform 0.3s ease;
+  }
+  .signboard-wrap:hover {
+    transform: rotate(0deg) scale(1.02);
+  }
+  .signboard-img {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 20px;
+    object-fit: contain;
+  }
+
+  .start-welcome-badge {
+    display: inline-block;
+    background: #FF7B54;
+    color: #FFF;
+    font-family: 'Jua', sans-serif;
+    font-size: clamp(20px, 3.5vh, 28px);
+    padding: 8px 24px;
+    border-radius: 50px;
+    margin-bottom: 12px;
+    box-shadow: 0 4px 10px rgba(255, 123, 84, 0.3);
+    animation: bounce 2s infinite ease-in-out;
+  }
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+
+  .start-cta{
+    width:100%;
+    max-width: 500px;
+    font-size:clamp(26px, 4.5vh, 36px);
+    padding: 0 20px;
+  }
 
   /* ---------------- 화면 2. 인원 선택 ---------------- */
   #screen-count{justify-content:flex-start;}
-  .count-title{font-size:clamp(22px,4vh,32px); text-align:center; margin-top:clamp(40px,7vh,60px);}
+  .count-title{font-size:clamp(24px, 4vh, 34px); text-align:center; margin-top:clamp(44px, 7vh, 64px);}
   .counter{
-    margin:clamp(28px,5vh,48px) 0 clamp(20px,3.5vh,30px);
+    margin:clamp(24px, 4vh, 40px) 0 clamp(20px, 3vh, 28px);
     display:flex;
     align-items:stretch;
-    gap:clamp(10px,2vw,16px);
+    gap:clamp(12px, 2vw, 20px);
   }
   .counter-btn{
-    width:clamp(70px,12vw,100px);
-    font-size:clamp(34px,6vh,50px);
+    width:clamp(76px, 14vw, 110px);
+    font-size:clamp(36px, 6vh, 56px);
     background:var(--secondary);
   }
-  .counter-btn:active{background:var(--secondary-press);}
   .counter-display{
     flex:1;
     background:var(--bg-card);
     border-radius:var(--radius);
+    border: 3px solid var(--border-color);
+    box-shadow: var(--shadow);
     display:flex;
     align-items:center;
     justify-content:center;
     font-family:'Jua',sans-serif;
-    font-size:clamp(40px,8vh,64px);
+    font-size:clamp(44px, 8vh, 68px);
     color:var(--text-dark);
   }
   .price-box{
     background:var(--bg-card);
     border-radius:var(--radius);
-    padding:clamp(16px,3vh,24px) clamp(16px,3vw,24px);
+    border: 3px solid var(--border-color);
+    box-shadow: var(--shadow);
+    padding:clamp(16px, 2.5vh, 24px) clamp(16px, 3vw, 24px);
     text-align:center;
-    margin-bottom:16px;
+    margin-bottom:12px;
   }
-  .price-box .label{font-size:clamp(14px,2vh,18px); color:var(--text-mid);}
-  .price-box .amount{font-family:'Jua',sans-serif; font-size:clamp(30px,6vh,46px); color:var(--accent-press); margin-top:4px;}
-  .unit-price{font-size:clamp(13px,1.8vh,16px); color:var(--text-mid); text-align:center; margin-bottom:auto;}
-  #screen-count .box-btn.primary{font-size:clamp(20px,3.5vh,28px); margin-top:16px;}
+  .price-box .label{font-size:clamp(15px, 2vh, 19px); color:var(--text-mid); font-weight: bold;}
+  .price-box .amount{font-family:'Jua',sans-serif; font-size:clamp(32px, 6vh, 48px); color:var(--accent); margin-top:4px;}
+  .unit-price{font-size:clamp(14px, 2vh, 18px); color:var(--text-mid); text-align:center; margin-bottom:auto;}
+  #screen-count .box-btn.primary{font-size:clamp(22px, 3.8vh, 30px); margin-top:16px;}
 
   /* ---------------- 화면 3. 결제 방법 선택 ---------------- */
   #screen-confirm{justify-content:flex-start;}
-  .confirm-title{font-size:clamp(20px,3.5vh,28px); text-align:center; margin:clamp(20px,4vh,32px) 0 clamp(16px,3vh,24px);}
+  .confirm-title{font-size:clamp(22px, 3.8vh, 30px); text-align:center; margin:clamp(16px, 3vh, 28px) 0 clamp(16px, 3vh, 24px);}
   .method-btn{
     width:100%;
-    font-size:clamp(20px,3.5vh,28px);
-    margin-bottom:clamp(14px,2.5vh,20px);
+    font-size:clamp(22px, 3.8vh, 30px);
+    margin-bottom:clamp(16px, 2.5vh, 22px);
     padding:0 20px;
   }
-  .method-icon{font-size:clamp(26px,4.5vh,36px);}
+  .method-icon{font-size:clamp(28px, 5vh, 40px);}
 
   /* ---------------- 화면 4-A. 카드 결제 / 4-B. 현금 결제 공통 ---------------- */
-  .center-screen{align-items:center; justify-content:center; text-align:center; gap:clamp(16px,3vh,24px);}
-  .pay-title{font-size:clamp(22px,4vh,30px);}
-  .pay-desc{font-size:clamp(16px,3vh,22px); color:var(--text-mid); line-height:1.6;}
-  .pay-amount{font-family:'Jua',sans-serif; font-size:clamp(34px,7vh,48px); color:var(--accent-press);}
-  .tag-icon{font-size:clamp(60px,11vh,88px);}
-  .sim-btn{width:80%; font-size:clamp(18px,3vh,24px);}
+  .center-screen{align-items:center; justify-content:center; text-align:center; gap:clamp(16px, 3vh, 24px);}
+  .pay-card-box {
+    background: #FFF;
+    width: 100%;
+    border-radius: 32px;
+    padding: clamp(24px, 4vh, 40px);
+    border: 4px solid var(--border-color);
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+  .pay-title{font-size:clamp(24px, 4vh, 32px);}
+  .pay-desc{font-size:clamp(18px, 3vh, 24px); color:var(--text-mid); line-height:1.5; font-weight: bold;}
+  .pay-amount{font-family:'Jua',sans-serif; font-size:clamp(36px, 7vh, 52px); color:var(--accent);}
+  .tag-icon{font-size:clamp(64px, 12vh, 96px);}
+  .sim-btn{width:100%; max-width: 400px; font-size:clamp(20px, 3.5vh, 26px);}
   .pulse{animation:pulse 1.4s infinite ease-in-out;}
-  @keyframes pulse{0%,100%{transform:scale(1);} 50%{transform:scale(1.08);}}
+  @keyframes pulse{0%,100%{transform:scale(1);} 50%{transform:scale(1.1);}}
 
   /* ---------------- 화면 4-B. 서명 ---------------- */
   #screen-signature{justify-content:flex-start;}
-  .sig-title{font-size:clamp(20px,3.5vh,28px); text-align:center; margin:clamp(16px,3vh,26px) 0 clamp(12px,2.5vh,18px);}
+  .sig-title{font-size:clamp(22px, 3.8vh, 30px); text-align:center; margin:clamp(16px, 3vh, 26px) 0 clamp(12px, 2vh, 18px);}
   .sig-pad-wrap{
     flex:1;
     background:var(--bg-card);
     border-radius:var(--radius);
-    border:3px dashed var(--secondary-press);
+    border: 4px dashed var(--accent);
     overflow:hidden;
-    margin-bottom:clamp(14px,2.5vh,20px);
+    margin-bottom:clamp(14px, 2.5vh, 20px);
     position:relative;
-    min-height:180px;
+    min-height:200px;
+    box-shadow: var(--shadow);
   }
   #sigCanvas{width:100%; height:100%; display:block; touch-action:none;}
   .sig-hint{
     position:absolute; inset:0;
     display:flex; align-items:center; justify-content:center;
-    color:var(--text-mid); font-size:clamp(14px,2.2vh,18px);
+    color:var(--text-mid); font-size:clamp(16px, 2.5vh, 20px); font-weight: bold;
     pointer-events:none;
   }
-  .sig-actions{display:flex; gap:clamp(10px,2vw,16px);}
-  .sig-actions .box-btn{flex:1; font-size:clamp(18px,3vh,24px);}
+  .sig-actions{display:flex; gap:clamp(12px, 2vw, 18px);}
+  .sig-actions .box-btn{flex:1; font-size:clamp(20px, 3.5vh, 26px);}
 
   /* ---------------- 화면 6. 결제 완료 ---------------- */
-  .complete-icon{font-size:clamp(56px,10vh,96px);}
-  .complete-title{font-size:clamp(22px,4vh,32px);}
-  .complete-sub{font-size:clamp(16px,3vh,22px); color:var(--text-mid);}
+  .complete-icon{font-size:clamp(60px, 11vh, 100px);}
+  .complete-title{font-size:clamp(24px, 4.2vh, 34px);}
+  .complete-sub{font-size:clamp(18px, 3vh, 24px); color:var(--text-mid); font-weight: bold;}
   .complete-info{
-    display:flex; gap:clamp(10px,2vw,16px); width:100%;
+    display:flex; gap:clamp(12px, 2vw, 18px); width:100%;
     margin-top:8px;
   }
 
   .grow{flex:1;}
 
-  /* 가로형(랜드스케이프) 태블릿 보정: 세로 높이가 좁을 때 여백/폰트 축소 */
   @media (orientation: landscape) and (max-height: 620px){
-    .fruit-illust{font-size:clamp(48px,9vh,80px);}
-    .tag-icon{font-size:clamp(44px,8vh,64px);}
-    .complete-icon{font-size:clamp(44px,8vh,64px);}
+    .tag-icon{font-size:clamp(48px, 9vh, 72px);}
+    .complete-icon{font-size:clamp(48px, 9vh, 72px);}
+    .signboard-wrap{padding: 10px;}
   }
 </style>
 </head>
@@ -244,11 +322,14 @@
 
   <!-- ================= 화면 1. 시작 화면 ================= -->
   <div class="screen active" id="screen-start">
-    <div>
-      <h1 class="start-title">어서오세요!</h1>
-      <div class="start-sub">열매 ㄱㄴㄷ 뷔페입니다</div>
+    <div class="start-welcome-badge">어서오세요!</div>
+    
+    <!-- 깃허브에 함께 올릴 IMG_5542.jpg 파일 -->
+    <div class="signboard-wrap">
+      <img src="IMG_5542.jpg" alt="열매 ㄱㄴㄷ 뷔페" class="signboard-img">
     </div>
-    <button class="box-btn primary start-cta" onclick="goTo('screen-count')">시작하기</button>
+
+    <button class="box-btn primary start-cta" onclick="goTo('screen-count')">시작하기 ➔</button>
   </div>
 
   <!-- ================= 화면 2. 인원 선택 ================= -->
@@ -268,13 +349,13 @@
     </div>
     <div class="unit-price">1인 당 10,000원</div>
 
-    <button class="box-btn primary" id="nextBtn" onclick="goTo('screen-confirm')" disabled>다음</button>
+    <button class="box-btn primary" id="nextBtn" onclick="goTo('screen-confirm')" disabled>다음 단계로 ➔</button>
   </div>
 
   <!-- ================= 화면 3. 결제 방법 선택 ================= -->
   <div class="screen" id="screen-confirm">
     <button class="back-btn" onclick="goTo('screen-count')">‹</button>
-    <div class="status-bar" style="margin-top:clamp(48px,9vh,72px);">
+    <div class="status-bar" style="margin-top:clamp(48px, 9vh, 72px);">
       <div class="status-chip">
         <div class="label">이용 인원</div>
         <div class="value" id="confirmCount">0명</div>
@@ -284,7 +365,7 @@
         <div class="value" id="confirmPrice">0원</div>
       </div>
     </div>
-    <h2 class="confirm-title">결제 방법을 선택해주세요</h2>
+    <h2 class="confirm-title">어떻게 결제할까요?</h2>
     <button class="box-btn primary method-btn" onclick="startCard()">
       <span class="method-icon">💳</span> 카드 결제
     </button>
@@ -296,51 +377,57 @@
   <!-- ================= 화면 4-A. 카드 결제 ================= -->
   <div class="screen center-screen" id="screen-card">
     <button class="back-btn" onclick="leaveCardScreen()">‹</button>
-    <h2 class="pay-title">카드 결제</h2>
-    <div class="tag-icon pulse" id="cardTagIcon">💳</div>
-    <div class="pay-desc" id="cardPayDesc">카드를 결제기에<br>태그해주세요</div>
-    <div class="pay-amount" id="cardAmount">0원</div>
+    <div class="pay-card-box">
+      <h2 class="pay-title">카드 결제</h2>
+      <div class="tag-icon pulse" id="cardTagIcon">💳</div>
+      <div class="pay-desc" id="cardPayDesc">카드를 결제기에<br>콕! 태그해주세요</div>
+      <div class="pay-amount" id="cardAmount">0원</div>
+    </div>
   </div>
 
   <!-- ================= 화면 4-B. 서명 ================= -->
   <div class="screen" id="screen-signature">
-    <h2 class="sig-title">서명해주세요</h2>
+    <h2 class="sig-title">멋지게 서명해주세요! ✍️</h2>
     <div class="sig-pad-wrap">
       <canvas id="sigCanvas"></canvas>
-      <div class="sig-hint" id="sigHint">여기에 손가락으로 서명해주세요</div>
+      <div class="sig-hint" id="sigHint">여기에 손가락으로 이름을 써보세요</div>
     </div>
     <div class="sig-actions">
       <button class="box-btn secondary" onclick="clearSignature()">다시 쓰기</button>
-      <button class="box-btn primary" onclick="finishPayment()">확인</button>
+      <button class="box-btn primary" onclick="finishPayment()">완료!</button>
     </div>
   </div>
 
   <!-- ================= 화면 5. 현금 결제 ================= -->
   <div class="screen center-screen" id="screen-cash">
     <button class="back-btn" onclick="goTo('screen-confirm')">‹</button>
-    <h2 class="pay-title">현금 결제</h2>
-    <div class="tag-icon">💵</div>
-    <div class="pay-amount" id="cashAmount">0원</div>
-    <div class="pay-desc">직원에게 현금을<br>전달해주세요</div>
-    <button class="box-btn dark sim-btn" onclick="finishPayment()">결제 완료</button>
+    <div class="pay-card-box">
+      <h2 class="pay-title">현금 결제</h2>
+      <div class="tag-icon">💵</div>
+      <div class="pay-amount" id="cashAmount">0원</div>
+      <div class="pay-desc">선생님에게 현금을<br>전달해주세요</div>
+      <button class="box-btn dark sim-btn" onclick="finishPayment()">결제 완료</button>
+    </div>
   </div>
 
   <!-- ================= 화면 6. 결제 완료 ================= -->
   <div class="screen center-screen" id="screen-complete">
-    <div class="complete-icon">✅</div>
-    <h2 class="complete-title">결제가 완료되었습니다!</h2>
-    <div class="complete-sub">감사합니다.<br>맛있게 드세요! 🍎</div>
-    <div class="complete-info">
-      <div class="status-chip grow">
-        <div class="label">이용 인원</div>
-        <div class="value" id="doneCount">0명</div>
+    <div class="pay-card-box">
+      <div class="complete-icon">🎉</div>
+      <h2 class="complete-title">결제가 완료되었습니다!</h2>
+      <div class="complete-sub">감사합니다!</div>
+      <div class="complete-info">
+        <div class="status-chip grow">
+          <div class="label">이용 인원</div>
+          <div class="value" id="doneCount">0명</div>
+        </div>
+        <div class="status-chip grow">
+          <div class="label">결제 금액</div>
+          <div class="value" id="donePrice">0원</div>
+        </div>
       </div>
-      <div class="status-chip grow">
-        <div class="label">결제 금액</div>
-        <div class="value" id="donePrice">0원</div>
-      </div>
+      <button class="box-btn primary" style="width:100%; margin-top: 10px;" onclick="resetAll()">처음으로 돌아가기</button>
     </div>
-    <button class="box-btn primary" style="width:100%;" onclick="resetAll()">처음으로</button>
   </div>
 
 </div>
@@ -384,14 +471,14 @@
     startNfcScan();
   }
 
-  /* ---- 실제 NFC 카드 태그 감지 (Web NFC API) ---- */
+  /* ---- NFC 카드 태그 감지 (Web NFC API) ---- */
   let nfcAbortController = null;
   let tagProcessed = false;
 
   function resetCardScreenMessage(){
     const desc = document.getElementById('cardPayDesc');
     const icon = document.getElementById('cardTagIcon');
-    if(desc) desc.innerHTML = '카드를 결제기에<br>태그해주세요';
+    if(desc) desc.innerHTML = '카드를 결제기에<br>콕! 태그해주세요';
     if(icon) icon.classList.add('pulse');
   }
 
@@ -414,9 +501,7 @@
         tagProcessed = true;
         cardTagged();
       };
-      reader.onreadingerror = () => {
-        // 한 번의 읽기 실패로 화면을 바꾸지 않고, 태그를 다시 시도할 수 있게 그대로 대기
-      };
+      reader.onreadingerror = () => {};
     }).catch(() => {
       document.getElementById('cardPayDesc').innerHTML = 'NFC 권한이 필요해요<br>선생님을 불러주세요';
       document.getElementById('cardTagIcon').classList.remove('pulse');
@@ -435,7 +520,6 @@
     goTo('screen-confirm');
   }
 
-  // count/confirm/cash 화면 전환 전 항상 최신 인원/금액 반영
   const _goTo = goTo;
   goTo = function(id){
     if(id === 'screen-confirm' || id === 'screen-cash'){ syncStatusEverywhere(); }
@@ -443,11 +527,8 @@
   };
 
   function cardTagged(){
-    // 실제 NFC 카드가 태그되어 reader.onreading이 발생하면 이 함수가 자동 호출됨
     stopNfcScan();
     goTo('screen-signature');
-    // 서명 화면이 실제로 레이아웃(display:flex)된 다음 프레임에 캔버스 크기를 잡아야
-    // 태블릿에서 캔버스 크기가 0으로 잡혀 서명이 안 되는 문제가 발생하지 않음
     requestAnimationFrame(() => requestAnimationFrame(setupSignaturePad));
   }
 
@@ -464,7 +545,7 @@
 
   updateCountUI();
 
-  /* ---- 서명 패드 (태블릿 터치 대응) ---- */
+  /* ---- 서명 패드 ---- */
   let sigCtx = null;
   let sigCanvas = null;
   let drawing = false;
@@ -475,7 +556,6 @@
     sigCanvas = document.getElementById('sigCanvas');
     const rect = sigCanvas.getBoundingClientRect();
 
-    // 화면이 아직 레이아웃되지 않아 크기가 0이면 다음 프레임에 다시 시도
     if(rect.width === 0 || rect.height === 0){
       requestAnimationFrame(setupSignaturePad);
       return;
@@ -487,15 +567,14 @@
 
     sigCtx = sigCanvas.getContext('2d');
     sigCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    sigCtx.lineWidth = 3;
+    sigCtx.lineWidth = 4;
     sigCtx.lineCap = 'round';
     sigCtx.lineJoin = 'round';
-    sigCtx.strokeStyle = '#3D362B';
+    sigCtx.strokeStyle = '#4A3E3D';
 
     hasStroke = false;
     document.getElementById('sigHint').style.display = 'flex';
 
-    // 이벤트를 매번 새로 붙이지 않도록 기존 리스너 제거 후 재등록
     sigCanvas.onpointerdown = handlePointerDown;
     sigCanvas.onpointermove = handlePointerMove;
     sigCanvas.onpointerup = handlePointerEnd;
@@ -512,7 +591,6 @@
     e.preventDefault();
     drawing = true;
     activePointerId = e.pointerId;
-    // 태블릿에서 손가락이 캔버스 밖으로 나가도 계속 그릴 수 있도록 포인터 캡처
     try{ sigCanvas.setPointerCapture(e.pointerId); }catch(err){}
     if(!hasStroke){
       hasStroke = true;
@@ -544,7 +622,6 @@
     document.getElementById('sigHint').style.display = 'flex';
   }
 
-  // 태블릿 화면 회전/리사이즈 시 서명 화면이 열려 있다면 캔버스를 다시 맞춤
   let resizeTimer = null;
   window.addEventListener('resize', () => {
     clearTimeout(resizeTimer);
