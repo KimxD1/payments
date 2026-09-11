@@ -1,344 +1,559 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-<title>NFC 모의결제 단말기</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>열매 ㄱㄴㄷ 뷔페</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg-deep: #0f2027;
-    --bg-panel: #16323a;
-    --bg-panel-2: #1c3d46;
-    --accent: #ffb648;
-    --accent-dim: #7a5a2a;
-    --ok: #4fd1a5;
-    --text-main: #eef4f3;
-    --text-dim: #8fa9ac;
-    --mono: 'DM Mono', 'SFMono-Regular', Consolas, monospace;
-    --sans: 'Manrope', -apple-system, sans-serif;
+    /* 전체 사이트 톤을 노란색 계열로 - 배경 자체를 옐로우 파스텔로 */
+    --bg-page:#FFEFA6;        /* Elfin Yellow 파스텔 - 배경 전체 톤 */
+    --bg-card:#FFFCEF;        /* 카드/정보 박스 - 배경보다 밝게, 가독성용 */
+    --primary:#CBDA4E;        /* Sunny Lime */
+    --primary-press:#B4C632;
+    --secondary:#F4DD86;      /* Elfin Yellow(진한 버전) */
+    --secondary-press:#E9C956;
+    --accent:#F0BA52;         /* Yellow Jasper */
+    --accent-press:#DE9F34;
+    --charlock:#C9C15C;       /* Charlock */
+    --charlock-press:#B0A83E;
+    --text-dark:#3D362B;
+    --text-mid:#7A6F5C;
+    --white:#FFFFFF;
+    --radius:15px;
   }
-  @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&family=DM+Mono:wght@400;500&display=swap');
-
-  * { box-sizing: border-box; }
-  html, body {
-    height: 100%;
-    margin: 0;
-    background: radial-gradient(circle at 50% 0%, var(--bg-panel-2), var(--bg-deep) 70%);
-    font-family: var(--sans);
-    color: var(--text-main);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{
+    margin:0;padding:0;
+    width:100%;
+    height:100%;
+    overscroll-behavior:none;
   }
-
-  .terminal {
-    width: 380px;
-    max-width: 92vw;
-    background: linear-gradient(180deg, var(--bg-panel), #102329);
-    border-radius: 28px;
-    padding: 28px 24px 32px;
-    box-shadow: 0 30px 60px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.06);
+  body{
+    background:var(--bg-page);
+    font-family:'Gowun Dodum','Noto Sans KR',sans-serif;
+    display:flex;
+    align-items:stretch;
+    justify-content:center;
+    min-height:100dvh;
   }
 
-  .brand-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 22px;
-  }
-  .brand-row .name { font-weight: 800; font-size: 15px; letter-spacing: 0.2px; }
-  .brand-row .mode-tag {
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--accent);
-    border: 1px solid var(--accent-dim);
-    padding: 3px 8px;
-    border-radius: 999px;
-    background: rgba(255,182,72,0.08);
+  /* 실제 기기(태블릿)에서 풀스크린으로 사용하는 반응형 앱 컨테이너 */
+  .app{
+    position:relative;
+    width:100%;
+    max-width:820px;           /* 가로가 넓은 태블릿에서도 과도하게 늘어나지 않도록 */
+    min-height:100dvh;
+    background:var(--bg-page);
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
   }
 
-  .amount-display {
-    background: #081418;
-    border-radius: 16px;
-    padding: 20px 18px;
-    margin-bottom: 22px;
-    border: 1px solid rgba(255,255,255,0.05);
+  .screen{
+    position:absolute;
+    inset:0;
+    display:none;
+    flex-direction:column;
+    padding: clamp(20px,4vh,44px) clamp(20px,5vw,56px);
+    animation:fadeIn .25s ease;
   }
-  .amount-label { font-size: 12px; color: var(--text-dim); margin-bottom: 6px; }
-  .amount-value {
-    font-family: var(--mono);
-    font-size: 34px;
-    font-weight: 500;
-    letter-spacing: -0.5px;
-    color: var(--text-main);
-  }
-  .amount-value span { color: var(--text-dim); font-size: 18px; margin-left: 4px; }
+  .screen.active{display:flex;}
+  @keyframes fadeIn{from{opacity:0;} to{opacity:1;}}
 
-  .tag-zone {
-    position: relative;
-    width: 210px;
-    height: 210px;
-    margin: 8px auto 22px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .ring {
-    position: absolute;
-    inset: 0;
-    border-radius: 50%;
-    border: 1.5px dashed rgba(255,182,72,0.25);
-  }
-  .ring.pulse { animation: pulse 1.6s ease-out infinite; }
-  @keyframes pulse {
-    0% { transform: scale(0.82); opacity: 0.9; border-color: rgba(255,182,72,0.55); }
-    100% { transform: scale(1.15); opacity: 0; border-color: rgba(255,182,72,0); }
-  }
-  .core {
-    width: 128px;
-    height: 128px;
-    border-radius: 50%;
-    background: radial-gradient(circle at 35% 30%, #234a52, #0d2126);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: inset 0 2px 6px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04);
-    transition: box-shadow 0.3s ease;
-  }
-  .core svg { width: 46px; height: 46px; }
-  .core.success { box-shadow: inset 0 2px 6px rgba(0,0,0,0.4), 0 0 0 3px rgba(79,209,165,0.5); }
-
-  .status-line {
-    text-align: center;
-    font-size: 14px;
-    color: var(--text-dim);
-    min-height: 20px;
-    margin-bottom: 18px;
-  }
-  .status-line.active { color: var(--accent); font-weight: 600; }
-  .status-line.success { color: var(--ok); font-weight: 700; }
-
-  .uid-line {
-    text-align: center;
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--text-dim);
-    min-height: 16px;
-    margin-bottom: 18px;
-    word-break: break-all;
+  h1,h2,.headline{
+    font-family:'Jua',sans-serif;
+    color:var(--text-dark);
+    margin:0;
+    line-height:1.35;
   }
 
-  button.primary {
-    width: 100%;
-    padding: 15px;
-    border-radius: 14px;
-    border: none;
-    background: var(--accent);
-    color: #21150a;
-    font-weight: 800;
-    font-size: 15px;
-    cursor: pointer;
-    letter-spacing: 0.2px;
+  /* ---- 공통 상단 바 (인원/금액 유지 표시) ---- */
+  .status-bar{
+    display:flex;
+    gap:clamp(10px,2vw,16px);
+    margin-bottom:clamp(14px,2.5vh,22px);
   }
-  button.primary:disabled { opacity: 0.5; cursor: not-allowed; }
-  button.primary:active:not(:disabled) { transform: scale(0.98); }
+  .status-chip{
+    flex:1;
+    background:var(--bg-card);
+    border-radius:var(--radius);
+    padding:clamp(12px,2vh,18px) clamp(12px,2vw,18px);
+    text-align:center;
+  }
+  .status-chip .label{font-size:clamp(13px,1.6vh,16px);color:var(--text-mid);}
+  .status-chip .value{font-family:'Jua',sans-serif;font-size:clamp(20px,3vh,26px);color:var(--text-dark);margin-top:2px;}
 
-  button.ghost {
-    width: 100%;
-    margin-top: 10px;
-    padding: 12px;
-    border-radius: 14px;
-    border: 1px solid rgba(255,255,255,0.1);
-    background: transparent;
-    color: var(--text-dim);
-    font-size: 13px;
-    cursor: pointer;
+  .back-btn{
+    position:absolute;
+    top:clamp(16px,3vh,24px); left:clamp(16px,4vw,24px);
+    width:clamp(52px,8vh,64px);height:clamp(52px,8vh,64px);
+    border-radius:var(--radius);
+    background:var(--bg-card);
+    border:none;
+    font-family:'Jua',sans-serif;
+    font-size:clamp(20px,3vh,26px);
+    color:var(--text-dark);
+    display:flex;align-items:center;justify-content:center;
+    z-index:5;
+    transition:transform .08s ease, background .12s ease;
+    touch-action:manipulation;
+  }
+  .back-btn:active{transform:scale(0.93);background:var(--secondary);}
+
+  /* ---- 큰 박스 버튼 공통 ---- */
+  .box-btn{
+    border:none;
+    border-radius:var(--radius);
+    font-family:'Jua',sans-serif;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    color:var(--text-dark);
+    transition:transform .08s ease, background-color .12s ease;
+    min-height:clamp(70px,10vh,92px);
+    touch-action:manipulation;
+    user-select:none;
+  }
+  .box-btn:active{transform:scale(0.96);}
+  .box-btn.primary{background:var(--primary);}
+  .box-btn.primary:active{background:var(--primary-press);}
+  .box-btn.secondary{background:var(--secondary);}
+  .box-btn.secondary:active{background:var(--secondary-press);}
+  .box-btn.accent{background:var(--accent); color:var(--white);}
+  .box-btn.accent:active{background:var(--accent-press);}
+  .box-btn.dark{background:var(--text-dark); color:var(--white);}
+  .box-btn.dark:active{background:#241f18;}
+  .box-btn:disabled{background:#F2ECC9; color:#B7AF9C; cursor:not-allowed;}
+  .box-btn:disabled:active{transform:none;}
+
+  /* ---------------- 화면 1. 시작 화면 ---------------- */
+  #screen-start{align-items:center; justify-content:center; text-align:center; gap:clamp(48px,10vh,96px);}
+  .start-title{font-size:clamp(38px,7.5vh,60px);}
+  .start-sub{font-size:clamp(26px,5.5vh,44px); margin-top:10px; color:var(--accent-press);}
+  .start-cta{width:100%; font-size:clamp(22px,4vh,32px); padding:0 20px;}
+
+  /* ---------------- 화면 2. 인원 선택 ---------------- */
+  #screen-count{justify-content:flex-start;}
+  .count-title{font-size:clamp(22px,4vh,32px); text-align:center; margin-top:clamp(40px,7vh,60px);}
+  .counter{
+    margin:clamp(28px,5vh,48px) 0 clamp(20px,3.5vh,30px);
+    display:flex;
+    align-items:stretch;
+    gap:clamp(10px,2vw,16px);
+  }
+  .counter-btn{
+    width:clamp(70px,12vw,100px);
+    font-size:clamp(34px,6vh,50px);
+    background:var(--secondary);
+  }
+  .counter-btn:active{background:var(--secondary-press);}
+  .counter-display{
+    flex:1;
+    background:var(--bg-card);
+    border-radius:var(--radius);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family:'Jua',sans-serif;
+    font-size:clamp(40px,8vh,64px);
+    color:var(--text-dark);
+  }
+  .price-box{
+    background:var(--bg-card);
+    border-radius:var(--radius);
+    padding:clamp(16px,3vh,24px) clamp(16px,3vw,24px);
+    text-align:center;
+    margin-bottom:16px;
+  }
+  .price-box .label{font-size:clamp(14px,2vh,18px); color:var(--text-mid);}
+  .price-box .amount{font-family:'Jua',sans-serif; font-size:clamp(30px,6vh,46px); color:var(--accent-press); margin-top:4px;}
+  .unit-price{font-size:clamp(13px,1.8vh,16px); color:var(--text-mid); text-align:center; margin-bottom:auto;}
+  #screen-count .box-btn.primary{font-size:clamp(20px,3.5vh,28px); margin-top:16px;}
+
+  /* ---------------- 화면 3. 결제 방법 선택 ---------------- */
+  #screen-confirm{justify-content:flex-start;}
+  .confirm-title{font-size:clamp(20px,3.5vh,28px); text-align:center; margin:clamp(20px,4vh,32px) 0 clamp(16px,3vh,24px);}
+  .method-btn{
+    width:100%;
+    font-size:clamp(20px,3.5vh,28px);
+    margin-bottom:clamp(14px,2.5vh,20px);
+    padding:0 20px;
+  }
+  .method-icon{font-size:clamp(26px,4.5vh,36px);}
+
+  /* ---------------- 화면 4-A. 카드 결제 / 4-B. 현금 결제 공통 ---------------- */
+  .center-screen{align-items:center; justify-content:center; text-align:center; gap:clamp(16px,3vh,24px);}
+  .pay-title{font-size:clamp(22px,4vh,30px);}
+  .pay-desc{font-size:clamp(16px,3vh,22px); color:var(--text-mid); line-height:1.6;}
+  .pay-amount{font-family:'Jua',sans-serif; font-size:clamp(34px,7vh,48px); color:var(--accent-press);}
+  .tag-icon{font-size:clamp(60px,11vh,88px);}
+  .sim-btn{width:80%; font-size:clamp(18px,3vh,24px);}
+  .pulse{animation:pulse 1.4s infinite ease-in-out;}
+  @keyframes pulse{0%,100%{transform:scale(1);} 50%{transform:scale(1.08);}}
+
+  /* ---------------- 화면 4-B. 서명 ---------------- */
+  #screen-signature{justify-content:flex-start;}
+  .sig-title{font-size:clamp(20px,3.5vh,28px); text-align:center; margin:clamp(16px,3vh,26px) 0 clamp(12px,2.5vh,18px);}
+  .sig-pad-wrap{
+    flex:1;
+    background:var(--bg-card);
+    border-radius:var(--radius);
+    border:3px dashed var(--secondary-press);
+    overflow:hidden;
+    margin-bottom:clamp(14px,2.5vh,20px);
+    position:relative;
+    min-height:180px;
+  }
+  #sigCanvas{width:100%; height:100%; display:block; touch-action:none;}
+  .sig-hint{
+    position:absolute; inset:0;
+    display:flex; align-items:center; justify-content:center;
+    color:var(--text-mid); font-size:clamp(14px,2.2vh,18px);
+    pointer-events:none;
+  }
+  .sig-actions{display:flex; gap:clamp(10px,2vw,16px);}
+  .sig-actions .box-btn{flex:1; font-size:clamp(18px,3vh,24px);}
+
+  /* ---------------- 화면 6. 결제 완료 ---------------- */
+  .complete-icon{font-size:clamp(56px,10vh,96px);}
+  .complete-title{font-size:clamp(22px,4vh,32px);}
+  .complete-sub{font-size:clamp(16px,3vh,22px); color:var(--text-mid);}
+  .complete-info{
+    display:flex; gap:clamp(10px,2vw,16px); width:100%;
+    margin-top:8px;
   }
 
-  .log-box {
-    margin-top: 22px;
-    border-top: 1px solid rgba(255,255,255,0.06);
-    padding-top: 14px;
-  }
-  .log-title { font-size: 11px; color: var(--text-dim); margin-bottom: 8px; }
-  .log-entry {
-    font-family: var(--mono);
-    font-size: 11.5px;
-    color: var(--text-main);
-    display: flex;
-    justify-content: space-between;
-    padding: 5px 0;
-    border-bottom: 1px dashed rgba(255,255,255,0.05);
-  }
-  .log-entry .ok-tag { color: var(--ok); }
-  .empty-log { font-size: 12px; color: var(--text-dim); font-style: italic; }
+  .grow{flex:1;}
 
-  .warn {
-    margin-top: 16px;
-    font-size: 11.5px;
-    color: var(--text-dim);
-    background: rgba(255,182,72,0.06);
-    border: 1px solid var(--accent-dim);
-    padding: 10px 12px;
-    border-radius: 10px;
-    line-height: 1.5;
+  /* 가로형(랜드스케이프) 태블릿 보정: 세로 높이가 좁을 때 여백/폰트 축소 */
+  @media (orientation: landscape) and (max-height: 620px){
+    .fruit-illust{font-size:clamp(48px,9vh,80px);}
+    .tag-icon{font-size:clamp(44px,8vh,64px);}
+    .complete-icon{font-size:clamp(44px,8vh,64px);}
   }
 </style>
 </head>
 <body>
 
-<div class="terminal">
-  <div class="brand-row">
-    <div class="name">태그결제 단말기</div>
-    <div class="mode-tag">MOCK MODE</div>
+<div class="app">
+
+  <!-- ================= 화면 1. 시작 화면 ================= -->
+  <div class="screen active" id="screen-start">
+    <div>
+      <h1 class="start-title">어서오세요!</h1>
+      <div class="start-sub">열매 ㄱㄴㄷ 뷔페입니다</div>
+    </div>
+    <button class="box-btn primary start-cta" onclick="goTo('screen-count')">시작하기</button>
   </div>
 
-  <div class="amount-display">
-    <div class="amount-label">결제 예정 금액 (모의)</div>
-    <div class="amount-value">12,000<span>원</span></div>
+  <!-- ================= 화면 2. 인원 선택 ================= -->
+  <div class="screen" id="screen-count">
+    <button class="back-btn" onclick="goTo('screen-start')">‹</button>
+    <h2 class="count-title">몇 명이 이용하시나요?</h2>
+
+    <div class="counter">
+      <button class="box-btn counter-btn" onclick="changeCount(-1)">−</button>
+      <div class="counter-display" id="countDisplay">0명</div>
+      <button class="box-btn counter-btn" onclick="changeCount(1)">＋</button>
+    </div>
+
+    <div class="price-box">
+      <div class="label">결제 금액</div>
+      <div class="amount" id="priceDisplay">0원</div>
+    </div>
+    <div class="unit-price">1인 당 10,000원</div>
+
+    <button class="box-btn primary" id="nextBtn" onclick="goTo('screen-confirm')" disabled>다음</button>
   </div>
 
-  <div class="tag-zone">
-    <div class="ring" id="ring1"></div>
-    <div class="ring" id="ring2" style="animation-delay:0.6s"></div>
-    <div class="core" id="core">
-      <svg id="icon-idle" viewBox="0 0 24 24" fill="none" stroke="#ffb648" stroke-width="1.6">
-        <path d="M6.5 12a5.5 5.5 0 0 1 11 0M4 12a8 8 0 0 1 16 0M9 12a2.5 2.5 0 0 1 6 0" stroke-linecap="round"/>
-      </svg>
-      <svg id="icon-ok" viewBox="0 0 24 24" fill="none" stroke="#4fd1a5" stroke-width="2" style="display:none">
-        <path d="M4 12.5l5 5L20 6.5" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
+  <!-- ================= 화면 3. 결제 방법 선택 ================= -->
+  <div class="screen" id="screen-confirm">
+    <button class="back-btn" onclick="goTo('screen-count')">‹</button>
+    <div class="status-bar" style="margin-top:clamp(48px,9vh,72px);">
+      <div class="status-chip">
+        <div class="label">이용 인원</div>
+        <div class="value" id="confirmCount">0명</div>
+      </div>
+      <div class="status-chip">
+        <div class="label">총 결제 금액</div>
+        <div class="value" id="confirmPrice">0원</div>
+      </div>
+    </div>
+    <h2 class="confirm-title">결제 방법을 선택해주세요</h2>
+    <button class="box-btn primary method-btn" onclick="startCard()">
+      <span class="method-icon">💳</span> 카드 결제
+    </button>
+    <button class="box-btn secondary method-btn" onclick="goTo('screen-cash')">
+      <span class="method-icon">💵</span> 현금 결제
+    </button>
+  </div>
+
+  <!-- ================= 화면 4-A. 카드 결제 ================= -->
+  <div class="screen center-screen" id="screen-card">
+    <button class="back-btn" onclick="leaveCardScreen()">‹</button>
+    <h2 class="pay-title">카드 결제</h2>
+    <div class="tag-icon pulse" id="cardTagIcon">💳</div>
+    <div class="pay-desc" id="cardPayDesc">카드를 결제기에<br>태그해주세요</div>
+    <div class="pay-amount" id="cardAmount">0원</div>
+  </div>
+
+  <!-- ================= 화면 4-B. 서명 ================= -->
+  <div class="screen" id="screen-signature">
+    <h2 class="sig-title">서명해주세요</h2>
+    <div class="sig-pad-wrap">
+      <canvas id="sigCanvas"></canvas>
+      <div class="sig-hint" id="sigHint">여기에 손가락으로 서명해주세요</div>
+    </div>
+    <div class="sig-actions">
+      <button class="box-btn secondary" onclick="clearSignature()">다시 쓰기</button>
+      <button class="box-btn primary" onclick="finishPayment()">확인</button>
     </div>
   </div>
 
-  <div class="status-line" id="status">카드를 태그해주세요</div>
-  <div class="uid-line" id="uidLine">&nbsp;</div>
-
-  <button class="primary" id="scanBtn">NFC 스캔 시작</button>
-  <button class="ghost" id="simBtn">태그 시뮬레이션 (테스트용)</button>
-
-  <div class="log-box">
-    <div class="log-title">거래 로그 (로컬 메모리, 서버 전송 없음)</div>
-    <div id="logList"><div class="empty-log">아직 기록된 거래가 없습니다</div></div>
+  <!-- ================= 화면 5. 현금 결제 ================= -->
+  <div class="screen center-screen" id="screen-cash">
+    <button class="back-btn" onclick="goTo('screen-confirm')">‹</button>
+    <h2 class="pay-title">현금 결제</h2>
+    <div class="tag-icon">💵</div>
+    <div class="pay-amount" id="cashAmount">0원</div>
+    <div class="pay-desc">직원에게 현금을<br>전달해주세요</div>
+    <button class="box-btn dark sim-btn" onclick="finishPayment()">결제 완료</button>
   </div>
 
-  <div class="warn" id="warnBox">
-    이 화면은 실제 결제를 처리하지 않는 모의(mock) 단말기입니다. Web NFC는 Android + Chrome(HTTPS 또는 localhost)에서만 동작하며, 스캔 시작은 버튼 클릭 등 사용자 조작 안에서만 호출할 수 있습니다.
+  <!-- ================= 화면 6. 결제 완료 ================= -->
+  <div class="screen center-screen" id="screen-complete">
+    <div class="complete-icon">✅</div>
+    <h2 class="complete-title">결제가 완료되었습니다!</h2>
+    <div class="complete-sub">감사합니다.<br>맛있게 드세요! 🍎</div>
+    <div class="complete-info">
+      <div class="status-chip grow">
+        <div class="label">이용 인원</div>
+        <div class="value" id="doneCount">0명</div>
+      </div>
+      <div class="status-chip grow">
+        <div class="label">결제 금액</div>
+        <div class="value" id="donePrice">0원</div>
+      </div>
+    </div>
+    <button class="box-btn primary" style="width:100%;" onclick="resetAll()">처음으로</button>
   </div>
+
 </div>
 
 <script>
-  const scanBtn = document.getElementById('scanBtn');
-  const simBtn = document.getElementById('simBtn');
-  const statusEl = document.getElementById('status');
-  const uidLine = document.getElementById('uidLine');
-  const core = document.getElementById('core');
-  const iconIdle = document.getElementById('icon-idle');
-  const iconOk = document.getElementById('icon-ok');
-  const ring1 = document.getElementById('ring1');
-  const ring2 = document.getElementById('ring2');
-  const logList = document.getElementById('logList');
+  const UNIT_PRICE = 10000;
+  let state = { count: 0 };
 
-  let txLog = [];
+  function fmt(n){ return n.toLocaleString('ko-KR') + '원'; }
 
-  function setPulsing(on) {
-    ring1.classList.toggle('pulse', on);
-    ring2.classList.toggle('pulse', on);
+  function goTo(id){
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
   }
 
-  function resetVisual() {
-    core.classList.remove('success');
-    iconIdle.style.display = 'block';
-    iconOk.style.display = 'none';
-    statusEl.className = 'status-line';
-    statusEl.textContent = '카드를 태그해주세요';
-    uidLine.textContent = '\u00A0';
+  function changeCount(delta){
+    state.count = Math.max(0, state.count + delta);
+    updateCountUI();
   }
 
-  function renderLog() {
-    if (txLog.length === 0) {
-      logList.innerHTML = '<div class="empty-log">아직 기록된 거래가 없습니다</div>';
+  function updateCountUI(){
+    const total = state.count * UNIT_PRICE;
+    document.getElementById('countDisplay').textContent = state.count + '명';
+    document.getElementById('priceDisplay').textContent = fmt(total);
+    document.getElementById('nextBtn').disabled = state.count === 0;
+  }
+
+  function syncStatusEverywhere(){
+    const total = state.count * UNIT_PRICE;
+    document.getElementById('confirmCount').textContent = state.count + '명';
+    document.getElementById('confirmPrice').textContent = fmt(total);
+    document.getElementById('cardAmount').textContent = fmt(total);
+    document.getElementById('cashAmount').textContent = fmt(total);
+    document.getElementById('doneCount').textContent = state.count + '명';
+    document.getElementById('donePrice').textContent = fmt(total);
+  }
+
+  function startCard(){
+    syncStatusEverywhere();
+    goTo('screen-card');
+    startNfcScan();
+  }
+
+  /* ---- 실제 NFC 카드 태그 감지 (Web NFC API) ---- */
+  let nfcAbortController = null;
+  let tagProcessed = false;
+
+  function resetCardScreenMessage(){
+    const desc = document.getElementById('cardPayDesc');
+    const icon = document.getElementById('cardTagIcon');
+    if(desc) desc.innerHTML = '카드를 결제기에<br>태그해주세요';
+    if(icon) icon.classList.add('pulse');
+  }
+
+  function startNfcScan(){
+    tagProcessed = false;
+    resetCardScreenMessage();
+
+    if(!('NDEFReader' in window)){
+      document.getElementById('cardPayDesc').innerHTML = '이 기기에서는 NFC 인식이<br>지원되지 않아요. 선생님을 불러주세요';
+      document.getElementById('cardTagIcon').classList.remove('pulse');
       return;
     }
-    logList.innerHTML = txLog.slice().reverse().map(t =>
-      `<div class="log-entry"><span>${t.time} · UID ${t.uid}</span><span class="ok-tag">MOCK 승인</span></div>`
-    ).join('');
-  }
 
-  // 카드를 태그했을 때 실행되는 '모의 결제' 처리부.
-  // 실제 결제 게이트웨이 호출 없이, UID만 받아 화면 상태만 바꾼다.
-  function handleTagDetected(uid) {
-    setPulsing(false);
-    statusEl.className = 'status-line active';
-    statusEl.textContent = '카드 인식됨 · 처리 중...';
-    uidLine.textContent = 'UID: ' + uid;
+    nfcAbortController = new AbortController();
+    const reader = new NDEFReader();
 
-    setTimeout(() => {
-      core.classList.add('success');
-      iconIdle.style.display = 'none';
-      iconOk.style.display = 'block';
-      statusEl.className = 'status-line success';
-      statusEl.textContent = '모의 승인 완료 (실결제 아님)';
-
-      txLog.push({
-        time: new Date().toLocaleTimeString('ko-KR', { hour12: false }),
-        uid: uid
-      });
-      renderLog();
-
-      setTimeout(resetVisual, 2200);
-    }, 1100);
-  }
-
-  function fakeUid() {
-    const bytes = Array.from({length: 4}, () =>
-      Math.floor(Math.random() * 256).toString(16).padStart(2, '0'));
-    return bytes.join(':').toUpperCase();
-  }
-
-  simBtn.addEventListener('click', () => {
-    setPulsing(true);
-    statusEl.className = 'status-line active';
-    statusEl.textContent = '태그 감지 대기 중 (시뮬레이션)...';
-    setTimeout(() => handleTagDetected(fakeUid()), 900);
-  });
-
-  scanBtn.addEventListener('click', async () => {
-    if (!('NDEFReader' in window)) {
-      statusEl.className = 'status-line';
-      statusEl.textContent = 'Web NFC 미지원 브라우저입니다';
-      uidLine.textContent = 'Android + Chrome + HTTPS 환경이 필요합니다';
-      return;
-    }
-    try {
-      const reader = new NDEFReader();
-      await reader.scan();
-
-      setPulsing(true);
-      statusEl.className = 'status-line active';
-      statusEl.textContent = '스캔 중... 카드를 태블릿에 태그하세요';
-      scanBtn.disabled = true;
-
-      reader.onreading = (event) => {
-        // event.message.records 는 카드에 아무 데이터가 없어도
-        // event.serialNumber(UID)는 태그 감지 시점에 함께 전달된다.
-        const uid = event.serialNumber || fakeUid();
-        handleTagDetected(uid);
-        scanBtn.disabled = false;
+    reader.scan({ signal: nfcAbortController.signal }).then(() => {
+      reader.onreading = () => {
+        if(tagProcessed) return;
+        tagProcessed = true;
+        cardTagged();
       };
-
       reader.onreadingerror = () => {
-        statusEl.className = 'status-line';
-        statusEl.textContent = '태그를 읽을 수 없습니다. 다시 시도하세요';
-        setPulsing(false);
-        scanBtn.disabled = false;
+        // 한 번의 읽기 실패로 화면을 바꾸지 않고, 태그를 다시 시도할 수 있게 그대로 대기
       };
-    } catch (err) {
-      statusEl.className = 'status-line';
-      statusEl.textContent = 'NFC 권한/스캔 실패: ' + err.message;
-      scanBtn.disabled = false;
+    }).catch(() => {
+      document.getElementById('cardPayDesc').innerHTML = 'NFC 권한이 필요해요<br>선생님을 불러주세요';
+      document.getElementById('cardTagIcon').classList.remove('pulse');
+    });
+  }
+
+  function stopNfcScan(){
+    if(nfcAbortController){
+      nfcAbortController.abort();
+      nfcAbortController = null;
     }
+  }
+
+  function leaveCardScreen(){
+    stopNfcScan();
+    goTo('screen-confirm');
+  }
+
+  // count/confirm/cash 화면 전환 전 항상 최신 인원/금액 반영
+  const _goTo = goTo;
+  goTo = function(id){
+    if(id === 'screen-confirm' || id === 'screen-cash'){ syncStatusEverywhere(); }
+    _goTo(id);
+  };
+
+  function cardTagged(){
+    // 실제 NFC 카드가 태그되어 reader.onreading이 발생하면 이 함수가 자동 호출됨
+    stopNfcScan();
+    goTo('screen-signature');
+    // 서명 화면이 실제로 레이아웃(display:flex)된 다음 프레임에 캔버스 크기를 잡아야
+    // 태블릿에서 캔버스 크기가 0으로 잡혀 서명이 안 되는 문제가 발생하지 않음
+    requestAnimationFrame(() => requestAnimationFrame(setupSignaturePad));
+  }
+
+  function finishPayment(){
+    syncStatusEverywhere();
+    goTo('screen-complete');
+  }
+
+  function resetAll(){
+    state.count = 0;
+    updateCountUI();
+    goTo('screen-start');
+  }
+
+  updateCountUI();
+
+  /* ---- 서명 패드 (태블릿 터치 대응) ---- */
+  let sigCtx = null;
+  let sigCanvas = null;
+  let drawing = false;
+  let hasStroke = false;
+  let activePointerId = null;
+
+  function setupSignaturePad(){
+    sigCanvas = document.getElementById('sigCanvas');
+    const rect = sigCanvas.getBoundingClientRect();
+
+    // 화면이 아직 레이아웃되지 않아 크기가 0이면 다음 프레임에 다시 시도
+    if(rect.width === 0 || rect.height === 0){
+      requestAnimationFrame(setupSignaturePad);
+      return;
+    }
+
+    const dpr = window.devicePixelRatio || 1;
+    sigCanvas.width = Math.round(rect.width * dpr);
+    sigCanvas.height = Math.round(rect.height * dpr);
+
+    sigCtx = sigCanvas.getContext('2d');
+    sigCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    sigCtx.lineWidth = 3;
+    sigCtx.lineCap = 'round';
+    sigCtx.lineJoin = 'round';
+    sigCtx.strokeStyle = '#3D362B';
+
+    hasStroke = false;
+    document.getElementById('sigHint').style.display = 'flex';
+
+    // 이벤트를 매번 새로 붙이지 않도록 기존 리스너 제거 후 재등록
+    sigCanvas.onpointerdown = handlePointerDown;
+    sigCanvas.onpointermove = handlePointerMove;
+    sigCanvas.onpointerup = handlePointerEnd;
+    sigCanvas.onpointercancel = handlePointerEnd;
+    sigCanvas.onpointerleave = handlePointerEnd;
+  }
+
+  function getPos(e){
+    const rect = sigCanvas.getBoundingClientRect();
+    return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+  }
+
+  function handlePointerDown(e){
+    e.preventDefault();
+    drawing = true;
+    activePointerId = e.pointerId;
+    // 태블릿에서 손가락이 캔버스 밖으로 나가도 계속 그릴 수 있도록 포인터 캡처
+    try{ sigCanvas.setPointerCapture(e.pointerId); }catch(err){}
+    if(!hasStroke){
+      hasStroke = true;
+      document.getElementById('sigHint').style.display = 'none';
+    }
+    const p = getPos(e);
+    sigCtx.beginPath();
+    sigCtx.moveTo(p.x, p.y);
+  }
+
+  function handlePointerMove(e){
+    if(!drawing || e.pointerId !== activePointerId) return;
+    e.preventDefault();
+    const p = getPos(e);
+    sigCtx.lineTo(p.x, p.y);
+    sigCtx.stroke();
+  }
+
+  function handlePointerEnd(e){
+    if(e.pointerId !== activePointerId) return;
+    drawing = false;
+    activePointerId = null;
+  }
+
+  function clearSignature(){
+    if(!sigCtx || !sigCanvas) return;
+    sigCtx.clearRect(0, 0, sigCanvas.width, sigCanvas.height);
+    hasStroke = false;
+    document.getElementById('sigHint').style.display = 'flex';
+  }
+
+  // 태블릿 화면 회전/리사이즈 시 서명 화면이 열려 있다면 캔버스를 다시 맞춤
+  let resizeTimer = null;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      const sigScreen = document.getElementById('screen-signature');
+      if(sigScreen.classList.contains('active')){
+        setupSignaturePad();
+      }
+    }, 150);
   });
 </script>
 
