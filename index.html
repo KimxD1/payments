@@ -10,15 +10,15 @@
   :root{
     /* 따뜻하고 밝은 노란색 파스텔 계열 컬러 팔레트 */
     --bg-page: #FFF4C3;        /* 따뜻한 파스텔 노랑 배경 */
-    --bg-card: #FFFFFF;        /* 카드 및 컨테이너 */
-    --primary: #FFD23F;        /* 메인 노랑 버튼 */
+    --bg-card: #FFFFFF;        /* 카드 및 컨테이너 (깔끔한 흰색) */
+    --primary: #FFD23F;        /* 메인 노랑-주황 버튼 */
     --primary-press: #E6B800;
-    --secondary: #FFE082;      /* 연한 노랑 */
+    --secondary: #FFE082;      /* 연한 따뜻한 노랑 */
     --secondary-press: #F5C842;
-    --accent: #FF7B54;         /* 포인트 주황 */
+    --accent: #FF7B54;         /* 포인트 상큼한 주황 */
     --accent-press: #E25B34;
-    --text-dark: #4A3E3D;      /* 다크 브라운 */
-    --text-mid: #8C7A6B;       /* 토프 브라운 */
+    --text-dark: #4A3E3D;      /* 부드러운 다크 브라운 */
+    --text-mid: #8C7A6B;       /* 따뜻한 토프 브라운 */
     --border-color: #F0CF65;   /* 귀여운 테두리 색상 */
     --radius: 24px;
     --shadow: 0 8px 20px rgba(212, 160, 23, 0.15);
@@ -42,6 +42,7 @@
     color: var(--text-dark);
   }
 
+  /* 태블릿 대응 앱 컨테이너 */
   .app{
     position:relative;
     width:100%;
@@ -96,10 +97,12 @@
     border-radius:50%;
     background:var(--bg-card);
     border: 3px solid var(--border-color);
-    font-family:'Jua',sans-serif;
+    font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     font-size:clamp(24px, 3.5vh, 32px);
+    line-height:1;
     color:var(--text-dark);
     display:flex; align-items:center; justify-content:center;
+    padding:2px 0 0 2px;
     z-index:5;
     cursor:pointer;
     box-shadow: 0 4px 10px rgba(0,0,0,0.08);
@@ -108,7 +111,7 @@
   }
   .back-btn:active{transform:scale(0.9); background:var(--secondary);}
 
-  /* ---- 버튼 스타일 ---- */
+  /* ---- 유아 친화적인 입체 버튼 스타일 ---- */
   .box-btn{
     border: 3px solid #DDA800;
     border-radius:var(--radius);
@@ -153,7 +156,7 @@
     padding: clamp(30px, 5vh, 60px) clamp(20px, 5vw, 40px);
   }
   
-  /* 손글씨 간판 이미지 프레임 */
+  /* 올려주신 손글씨 간판 이미지 프레임 */
   .signboard-wrap {
     width: 100%;
     max-width: 680px;
@@ -224,7 +227,7 @@
     align-items:center;
     justify-content:center;
     font-family:'Jua',sans-serif;
-    font-size:clamp(44px, 8vh, 68px);
+    font-size:clamp(34px, 6vh, 52px);
     color:var(--text-dark);
   }
   .price-box{
@@ -309,6 +312,7 @@
 
   .grow{flex:1;}
 
+  /* 랜드스케이프 태블릿 보정 */
   @media (orientation: landscape) and (max-height: 620px){
     .tag-icon{font-size:clamp(48px, 9vh, 72px);}
     .complete-icon{font-size:clamp(48px, 9vh, 72px);}
@@ -322,9 +326,9 @@
 
   <!-- ================= 화면 1. 시작 화면 ================= -->
   <div class="screen active" id="screen-start">
-    <div class="start-welcome-badge">어서오세요!</div>
+    <div class="start-welcome-badge">맛있는 과일이 가득! 🍓🍇</div>
     
-    <!-- 깃허브에 함께 올릴 IMG_5542.jpg 파일 -->
+    <!-- 아이들이 직접 그린 'IMG_5542.jpg' 간판 사진 배치 -->
     <div class="signboard-wrap">
       <img src="IMG_5542.jpeg" alt="열매 ㄱㄴㄷ 뷔페" class="signboard-img">
     </div>
@@ -405,7 +409,7 @@
       <h2 class="pay-title">현금 결제</h2>
       <div class="tag-icon">💵</div>
       <div class="pay-amount" id="cashAmount">0원</div>
-      <div class="pay-desc">선생님에게 현금을<br>전달해주세요</div>
+      <div class="pay-desc">선생님(직원)에게 현금을<br>전달해주세요</div>
       <button class="box-btn dark sim-btn" onclick="finishPayment()">결제 완료</button>
     </div>
   </div>
@@ -415,7 +419,7 @@
     <div class="pay-card-box">
       <div class="complete-icon">🎉</div>
       <h2 class="complete-title">결제가 완료되었습니다!</h2>
-      <div class="complete-sub">감사합니다!</div>
+      <div class="complete-sub">맛있게 드세요! 🍎🍌🍊</div>
       <div class="complete-info">
         <div class="status-chip grow">
           <div class="label">이용 인원</div>
@@ -471,7 +475,7 @@
     startNfcScan();
   }
 
-  /* ---- NFC 카드 태그 감지 (Web NFC API) ---- */
+  /* ---- 실제 NFC 카드 태그 감지 (Web NFC API) ---- */
   let nfcAbortController = null;
   let tagProcessed = false;
 
@@ -545,7 +549,7 @@
 
   updateCountUI();
 
-  /* ---- 서명 패드 ---- */
+  /* ---- 서명 패드 (태블릿 터치 대응) ---- */
   let sigCtx = null;
   let sigCanvas = null;
   let drawing = false;
