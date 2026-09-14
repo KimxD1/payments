@@ -436,15 +436,45 @@
 
 </div>
 
+<!-- ================= 화면별 안내 음성 ================= -->
+<audio id="audio-screen-start" src="01_어서오세요_열매_가나다뷔페입니다.mp3" preload="auto"></audio>
+<audio id="audio-screen-count" src="02_몇_명이_이용하시나요.mp3" preload="auto"></audio>
+<audio id="audio-screen-confirm" src="03_어떻게_결제할까요.mp3" preload="auto"></audio>
+<audio id="audio-screen-cash" src="04_직원에게_현금을_전달해주세요.mp3" preload="auto"></audio>
+<audio id="audio-screen-card" src="05_카드를_결제기에_콕_태그해주세요.mp3" preload="auto"></audio>
+<audio id="audio-screen-signature" src="06_멋지게_서명해주세요.mp3" preload="auto"></audio>
+<audio id="audio-screen-complete" src="07_결제가_완료되었습니다_맛있게_드세요.mp3" preload="auto"></audio>
+
 <script>
   const UNIT_PRICE = 10000;
   let state = { count: 0 };
 
   function fmt(n){ return n.toLocaleString('ko-KR') + '원'; }
 
+  const screenAudioMap = {
+    'screen-start': 'audio-screen-start',
+    'screen-count': 'audio-screen-count',
+    'screen-confirm': 'audio-screen-confirm',
+    'screen-cash': 'audio-screen-cash',
+    'screen-card': 'audio-screen-card',
+    'screen-signature': 'audio-screen-signature',
+    'screen-complete': 'audio-screen-complete'
+  };
+
+  function playScreenAudio(id){
+    document.querySelectorAll('audio').forEach(a => { a.pause(); a.currentTime = 0; });
+    const audioId = screenAudioMap[id];
+    const audio = audioId && document.getElementById(audioId);
+    if(audio){
+      audio.currentTime = 0;
+      audio.play().catch(() => { /* 브라우저 자동재생 정책으로 막힌 경우 조용히 무시 */ });
+    }
+  }
+
   function goTo(id){
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(id).classList.add('active');
+    playScreenAudio(id);
   }
 
   function changeCount(delta){
@@ -548,6 +578,7 @@
   }
 
   updateCountUI();
+  window.addEventListener('DOMContentLoaded', () => playScreenAudio('screen-start'));
 
   /* ---- 서명 패드 (태블릿 터치 대응) ---- */
   let sigCtx = null;
